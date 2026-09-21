@@ -23,10 +23,10 @@ def upsert_veh_recg_logs(records):
         return False
     
     # 所屬資料表名稱
-    tbls_info = TABLES["infer"]["veh_recg"]
+    table_info = TABLES["infer"]["veh_recg"]
     # 高效批次寫入並回傳 DB 寫入結果
     upsert_df = pd.DataFrame(records)
-    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=tbls_info)
+    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=table_info)
 
     return bool(upst_cnts > 0)
 
@@ -46,10 +46,10 @@ def upsert_veh_monitor_records(records):
         records = [records]
 
     # 所屬資料表名稱
-    tbls_info = TABLES["infer"]["veh_moni"]
+    table_info = TABLES["infer"]["veh_moni"]
 
     # 高效批次寫入並回傳 DB 寫入結果
     upsert_df = pd.DataFrame(records)
-    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=tbls_info)
+    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=table_info)
 
     return bool(upst_cnts > 0)

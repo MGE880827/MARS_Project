@@ -1,6 +1,6 @@
 # ##########################################################################################
 # 專案名稱: 多重目標自動辨識系統 - 自動化模型訓練工具 (Automated Model Training Tool)
-# 維護日期: 2026-09-18
+# 維護日期: 2026-09-22
 # 檔案路徑: MARS_Project/src/modl_opts/auto_train.py
 # ##########################################################################################
 
@@ -54,7 +54,7 @@ class YoloModelTrainer:
                - stage_level  : [int] 階層識別代碼 (1: 主階層, 2: 次階層)
                - sub_domain   : [str] 次領域識別代碼 ("LIC", "BRAND")
                - task_spec    : [dict] 該階層之專屬策略配置 (內含 task_name, domain, bbox_type, gt_cls_ids 等 7 項配置)
-               - train_params : [dict] 訓練參數字典 (batch_size, accumulate, epoch_qty, learn_rate)
+               - train_params : [dict] 訓練參數字典 (batch_size, nbs, epoch_qty, learn_rate)
         [輸出] dict: 內含執行結果之結構化字典，共計 4 組鍵值，以下說明:
                - stat_code : [int] 執行狀態代碼 (200-成功, 206-局部落地, 400-格式錯誤, 404-缺檔, 500-系統異常)
                - stat_msge : [str] 狀態識別標籤 (e.g., COMPLETED, PARTIAL_SUCCESS, MISSING_DATA_YAML, SYSTEM_ERROR)
@@ -65,7 +65,7 @@ class YoloModelTrainer:
                  - stage_level  : [int] 階層識別代碼 (1: 主階層, 2: 次階層)
                  - sub_domains  : [list] 次領域識別代碼清單，若為單階層則為 []
                  - final_map50s : [list] 模型收斂後之最佳 mAP@0.5 精度表現清單
-                 - wght_paths   : [list] 產出之最佳權重檔案實體路徑清單
+                 - wght_paths   : [list] 產出之最佳權重絕對路徑清單
         """
         stage_name = f"YOLO-T-{domain}" if stage_level == 1 else f"YOLO-T-{domain}-{sub_domain}"
 
@@ -174,7 +174,7 @@ class YoloModelTrainer:
                 "stage_level"  : stage_level,
                 "sub_domains"  : [sub_domain] if stage_level == 2 else [],
                 "final_map50s" : [best_map50],
-                "wght_paths"   : [str(wght_rel_path)]
+                "wght_paths"   : [str(best_wght_path.resolve())]
             }
         }
         return yolo_train_rslt
@@ -284,13 +284,13 @@ class YoloModelTrainer:
                - data_yaml_path : [Path] 標註資料集中介檔案實體路徑 (data.yaml)
                - img_size       : [int] 訓練輸入影像尺寸 (寬高像素)
                - yolo_rslt_dir  : [Path] YOLO 訓練資料之根目錄
-               - train_params   : [dict] 訓練參數字典 (batch_size, accumulate, epoch_qty, learn_rate)
+               - train_params   : [dict] 訓練參數字典 (batch_size, nbs, epoch_qty, learn_rate)
         [輸出] tuple: (rslt_run_dir: Path, err_ret: dict/None)
                - rslt_run_dir : [Path/None] 成功時回傳 YOLO 產出資料目錄，失敗為 None
                - err_ret      : [dict/None] 失敗時回傳結構化錯誤字典，成功為 None
         """
         batch_size = train_params["batch_size"]
-        accumulate = train_params["accumulate"]
+        nbs        = train_params["nbs"]
         epoch_qty  = train_params["epoch_qty"]
         learn_rate = train_params["learn_rate"]
 
@@ -312,7 +312,7 @@ class YoloModelTrainer:
                 exist_ok   = True,
                 imgsz      = img_size,
                 batch      = batch_size,
-                accumulate = accumulate,
+                nbs        = nbs,
                 epochs     = epoch_qty,
                 lr0        = learn_rate,
             )
@@ -456,7 +456,7 @@ class YoloModelTrainer:
         db_name   = f"{proj_name}-DB"
 
         batch_size = train_params["batch_size"]
-        accumulate = train_params["accumulate"]
+        nbs = train_params["nbs"]
         epoch_qty  = train_params["epoch_qty"]
         learn_rate = train_params["learn_rate"]
 
@@ -471,11 +471,11 @@ class YoloModelTrainer:
             "train_date"  : train_date,       # 訓練完成日期戳記 (YYYY-MM-DD)
             "algo_name"   : algo_name,        # 演算法架構 (e.g., "MARS-YOLO11")
             "bone_name"   : bone_name,        # 基礎預訓練骨幹權重 (e.g., "yolo11n.pt", "yolo11n-obb.pt")
-            "wght_path"   : wght_path,        # 最佳權重實體儲存路徑 (weights/<DOMAIN>/.../best.pt)
+            "wght_path"   : wght_path,        # 最佳權重相對路徑 (weights/<DOMAIN>/.../best.pt)
             "class_qty"   : class_qty,        # 該領域物件類別數量
             "img_size"    : img_size,         # 輸入影像之解析度 (e.g., 640, 480)
             "batch_size"  : batch_size,       # 訓練批次大小
-            "accumulate"  : accumulate,       # 梯度累積步數
+            "nbs"         : nbs,              # 梯度累積步數
             "epoch_qty"   : epoch_qty,        # 總訓練輪次數
             "learn_rate"  : learn_rate,       # 最佳化初始學習率
         }
@@ -564,7 +564,7 @@ class YoloModelTrainer:
                - train_date : [str] 模型訓練日期 (YYYY-MM-DD)
                - epoch_qty  : [int] 總訓練輪數，若未設置則預設使用全域組態
                - learn_rate : [float] 最佳化初始學習率；若未設置則預設使用全域組態
-               # Remark-1 : batch_size 與 accumulate 鎖定於 algo_config 中內部讀取，注意硬體規格，防範顯存溢出
+               # Remark-1 : batch_size 與 nbs 鎖定於 algo_config 中內部讀取，注意硬體規格，防範顯存溢出
         [輸出] dict: 內含執行結果之結構化字典，共計 4 組鍵值，以下說明:
                - stat_code : [int] 執行狀態代碼 (200-成功, 206-局部落地, 400-格式錯誤, 404-缺檔, 500-系統異常)
                - stat_msge : [str] 狀態識別標籤 (e.g., COMPLETED, PARTIAL_SUCCESS, MISSING_DATA_YAML, SYSTEM_ERROR)
@@ -575,7 +575,7 @@ class YoloModelTrainer:
                  - stage_qty    : [int] 模型階層數量 (1: 單階層全圖訓練, 2: 二階層串聯裁切投影與微觀訓練)
                  - sub_domains  : [list] 次領域識別代碼清單，若為單階層則為 []
                  - final_map50s : [list] 模型收斂後之最佳 mAP@0.5 精度表現清單
-                 - wght_paths   : [list] 產出之最佳權重檔案實體路徑清單
+                 - wght_paths   : [list] 產出之最佳權重絕對路徑清單
         """
         domain = str(domain).strip().upper()
         stage_name = f"YOLO-T-{domain}"
@@ -616,7 +616,7 @@ class YoloModelTrainer:
             yolo_t = self.algo_cfg.yolo_t
             train_params = {
                 "batch_size" : yolo_t.batch_size,
-                "accumulate" : yolo_t.accumulate,
+                "nbs" : yolo_t.nbs,
                 "epoch_qty"  : epoch_qty  if epoch_qty is not None else yolo_t.epoch_qty,
                 "learn_rate" : learn_rate if learn_rate is not None else yolo_t.learn_rate
             }

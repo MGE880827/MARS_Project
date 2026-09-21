@@ -1,6 +1,6 @@
 # ##########################################################################################
 # 專案名稱: 多重目標自動辨識系統 - 階層級聯協調工具 (Hierarchical Cascade Coordination Tool)
-# 維護日期: 2026-09-16
+# 維護日期: 2026-09-22
 # 檔案路徑: MARS_Project/src/modl_opts/stage_coord.py
 # ##########################################################################################
 
@@ -64,21 +64,33 @@ class StageCoordinator:
         if not split_img_dir.exists():
             return split_stats
 
-        # 主階層配置策略
+        cls_name_to_id = {}
+
+        # 動態掛載 Stage-1 主階層名稱
         stage_1_cfg  = stage_rule["stage_1"]
         main_cls_ids = set(stage_1_cfg.get("gt_cls_ids", []))
-        # 階層級聯配置策略
+        for cls_name, global_cls_id in zip(stage_1_cfg.get("cls_names", []), stage_1_cfg.get("gt_cls_ids", [])):
+            cls_name_to_id[cls_name.lower().strip()] = global_cls_id
+
+        # 動態掛載 Stage-2 次階層名稱與平移表 (全域 Global 類別 ID -> 區域 Local 類別 ID)
         transition   = stage_rule.get("transition", {})
         crop_margin  = transition.get("crop_margin", 0.05)
-        # 次階層配置策略
         stage_2_cfg  = stage_rule.get("stage_2", {})
         sub_tasks    = stage_2_cfg.get("sub_tasks", {})
 
-        # 建立次領域類別編號映射字典，將「全域(Global)類別ID」轉換成「區域(Local)類別ID」
         cls_id_remap = {}
         for sub_domain, sub_info in sub_tasks.items():
-            for local_cls_id, global_cls_id in enumerate(sub_info["gt_cls_ids"]):
+            for local_cls_id, (cls_name, global_cls_id) in enumerate(zip(sub_info.get("cls_names", []), sub_info.get("gt_cls_ids", []))):
+                cls_name_to_id[cls_name.lower().strip()] = global_cls_id
                 cls_id_remap[global_cls_id] = (sub_domain, local_cls_id)
+
+        # 讀取 Roboflow 該領域的 data.yaml 取得 names 陣列
+        robo_data_path = Path(domain_dir) / "data.yaml"
+        robo_cls_names = []
+        if robo_data_path.exists():
+            with open(robo_data_path, "r", encoding="utf-8") as yaml_file:
+                yaml_cfg = yaml.safe_load(yaml_file)
+                robo_cls_names = [str(cls_name).lower().strip() for cls_name in yaml_cfg.get("names", [])]
 
         valid_extensions = [".jpg", ".jpeg", ".png", ".bmp", ".webp"]
         for img_path in sorted(split_img_dir.iterdir()):
@@ -94,9 +106,9 @@ class StageCoordinator:
                     obj_lbls = [l.strip() for l in f if l.strip()]
             except Exception:
                 continue
-            
+
             # 主物件座標資訊分流篩選
-            lbl_items = [self._parse_object_label(label) for label in obj_lbls]
+            lbl_items = [self._parse_object_label(label, robo_cls_names, cls_name_to_id) for label in obj_lbls]
             lbl_items = [item for item in lbl_items if item is not None]
             main_objs = [item for item in lbl_items if item["cls_id"] in main_cls_ids]
             sub_objs  = [item for item in lbl_items if item["cls_id"] in cls_id_remap]
@@ -206,11 +218,17 @@ class StageCoordinator:
         return split_stats
 
     # =============================================
-    def _parse_object_label(self, label):
+    def _parse_object_label(self, label, robo_cls_names=None, cls_name_to_id=None):
         """
         [名稱] Func.B-1 單筆標註幾何解析函式
-        [功能] 將單行 YOLO 格式標籤拆解為類別 ID 與正規化坐標，自動判定 HBB-水平框 (4項坐標) 或 OBB-旋轉框 (8項坐標)。
-        [參數] label: [str] YOLO 格式單筆標註文字字串
+        [功能] 將單行 YOLO 格式標籤拆解並動態轉譯類別識別，自動判定幾何形態：
+               1. 藉由 data.yaml 索引映射反查類別名稱，動態對齊全域 ID (Global ID)。
+               2. 嚴格過濾未定義於階層策略之無效或異常標籤 (返回 None)。
+               3. 辨別 HBB-水平框 (4項) 與 OBB-旋轉框 (8項)，並相容 Roboflow 首尾閉合之 10 項多邊形坐標。
+        [參數] 共計 3 組參數，以下說明:
+               - label          : [str] YOLO 格式單筆標註文字字串
+               - robo_cls_names : [list/None] Roboflow 標註中介資料 (data.yaml) 定義之類別名稱清單
+               - cls_name_to_id : [dict/None] 階層策略字典動態建置之「類別名稱」-> 「全域 ID」映射表
         [輸出] dict/None: 內含幾何解析結果之結構化字典，若傳入為空行或純空白字串則回傳 None，共計 3 組鍵值，以下說明:
                - cls_id    : [int] 物件類別識別編號 (Class ID)
                - bbox_type : [str/None] 邊界框類型 ("HBB": 水平框, "OBB": 旋轉框, None: 非標準或未定義格式)
@@ -219,18 +237,35 @@ class StageCoordinator:
         parts = label.split()
         if not parts:
             return None
-        cls_id = int(parts[0])
+        lbl_cls_id = int(parts[0])
+
+        # 嚴格校驗：必須存在於 data.yaml 的 names 且必須定義在 stage_rule 的對照表內
+        if robo_cls_names and cls_name_to_id and lbl_cls_id < len(robo_cls_names):
+            cls_name = robo_cls_names[lbl_cls_id]
+            # 標註標籤未定義在 stage_rule 階層策略配置中，無效略過
+            if cls_name not in cls_name_to_id:
+                return None
+            global_cls_id = cls_name_to_id[cls_name]
+        else:
+            # 無法映射的異常標籤，直接剔除
+            return None
+
         coords = [float(c) for c in parts[1:]]
         
         if len(coords) == 4:
             bbox_type = "HBB"
-        elif len(coords) == 8:
+        elif len(coords) >= 8:
             bbox_type = "OBB"
+            # 若為 10 個座標 (Roboflow 多邊形首尾閉合)，保留前 8 個數值作為 4 頂點旋轉框
+            if len(coords) == 10 and coords[0] == coords[8] and coords[1] == coords[9]:
+                coords = coords[:8]
+            elif len(coords) > 8:
+                coords = coords[:8]
         else:
             return None
         
         lbl_item = {
-            "cls_id"    : cls_id,
+            "cls_id"    : global_cls_id,
             "bbox_type" : bbox_type,
             "coords"    : coords
         }

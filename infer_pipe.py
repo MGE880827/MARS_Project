@@ -272,19 +272,19 @@ class InferPipeline:
                             "recg_ts"   : recg_ts
                         }
 
-                        final_results = pipe_inst(
+                        proc_results, sync_rslt, err_ret = pipe_inst(
                             frame      = frame,
                             detections = main_detections,
                             frame_meta = frame_meta
                         )
-                        if final_results:
-                            main_obj_extr += len(final_results)
+                        if proc_results:
+                            main_obj_extr += len(proc_results)
                             log.CONTENT(
                                 type = "FRAME",
                                 targ = f"{vid_name}-{curr_frms:05d}",
                                 idnt = "EXTRACT_SUCCESS",
                                 stat = "SUCC",
-                                msge = f"[時間: {recg_ts.strftime('%H:%M:%S')}] 成功辨識 {len(final_results)} 組主物件特徵"
+                                msge = f"[時間: {recg_ts.strftime('%H:%M:%S')}] 成功辨識 {len(proc_results)} 組主物件特徵"
                             )
 
                     # 辨識數據統計

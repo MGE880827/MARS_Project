@@ -270,8 +270,8 @@ class VisionModelPreloader:
 
         # [STEP-2] 驅動 PaddleOCR 載入記憶體
         try:
-            # 關閉「方向分類器」及「底層日誌」以提升辨識速度，並使用「繁中」與「英數」模型來進行字元辨識
-            ocr_inst = PaddleOCR(use_angle_cls=False, lang=lang, show_log=False)
+            # 關閉「方向分類器」以提升辨識速度，並使用「繁中」與「英數」模型來進行字元辨識
+            ocr_inst = PaddleOCR(use_angle_cls=False, lang=lang)
             # 將此模型實例存放至重型影像處理工具實例映射表，供下層領域管線引用
             self.tool_pool[tool_key] = ocr_inst
             log.CONTENT(

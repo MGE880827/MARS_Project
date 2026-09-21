@@ -49,7 +49,7 @@ class YoloTrainConfig:
     default_sub_imgsz  : int = 480                # 次階層 (Stage-2) 預設微觀裁切輸入影像尺寸 (像素寬高)
     
     batch_size         : int = 4                  # 訓練批次大小: 限制單次饋入 GPU 之影像張數
-    accumulate         : int = 4                  # 梯度累積步數: 延遲權重更新之累加步數，在顯示卡硬體限制下，能模擬出 Batch=16 的高收斂精度
+    nbs                : int = 16                 # 名目批次大小: 目標等效 Batch，配合 batch_size 自動折算梯度累積步數 (nbs / batch_size = 4 步)，在顯存限制下模擬 Batch=16 的收斂精度
     epoch_qty          : int = 100                # 全域預設總訓練輪次數 (各領域可獨立覆寫)
     learn_rate         : float = 0.01             # 最佳化初始學習率: 控制特徵權重修正力道大小
 
@@ -77,10 +77,10 @@ class AlgorithmConfig:
     [名稱] 演算法組態管理引擎 (Algorithm Configuration Management Engine)
     [作用] 集中管控「時序抽幀」、「影像預處理」、「模型訓練底層基準」以及「物件偵測底層基準」之核心基石。
     """
-    stream : StreamConfig    = StreamConfig()
-    clahe  : ClaheConfig     = ClaheConfig()
-    yolo_t : YoloTrainConfig = YoloTrainConfig()
-    yolo_i : YoloInferConfig = YoloInferConfig()
+    stream : StreamConfig    = field(default_factory=StreamConfig)
+    clahe  : ClaheConfig     = field(default_factory=ClaheConfig)
+    yolo_t : YoloTrainConfig = field(default_factory=YoloTrainConfig)
+    yolo_i : YoloInferConfig = field(default_factory=YoloInferConfig)
 
 # =============================================
 # ⭐｜模組導出｜實例化管理對象

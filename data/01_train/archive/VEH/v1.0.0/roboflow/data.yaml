@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 5
+names: ['car', 'license_plate', 'luxgen', 'nissan', 'truck']
+
+roboflow:
+  workspace: magiceason
+  project: veh-an7sf
+  version: 2
+  license: CC BY 4.0
+  url: https://universe.roboflow.com/magiceason/veh-an7sf/dataset/2

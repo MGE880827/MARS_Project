@@ -30,15 +30,15 @@ class DBManager:
         self.params = DB_PARAMS   # 資料庫連線參數
 
     # =============================================
-    def _build_conflict_fragments(self, upsert_df, tabl_path, cflt_keys, w_mode):
+    def _build_conflict_fragments(self, upsert_df, table_path, cflt_keys, w_mode):
         """
         [名稱] Func.B 衝突處理語法建構函式
         [功能] 動態構建 PostgreSQL 衝突處理語句 (ON CONFLICT)，支援多維度寫入策略。
         [參數] 共計 4 組參數，以下說明:
-               - upsert_df : [pd.DataFrame] 待寫入之數據集，用於提取目標欄位
-               - tabl_path : [str] 完整資料表路徑 (schema.table_name)，用於 SQL 語句之別名定位
-               - cflt_keys : [list] 資料表主鍵清單，作為觸發衝突之判定基準
-               - w_mode    : [dict] 欄位寫入策略配置；預設為 overwrite (覆寫模式)
+               - upsert_df  : [pd.DataFrame] 待寫入之數據集，用於提取目標欄位
+               - table_path : [str] 完整資料表路徑 (schema.table_name)，用於 SQL 語句之別名定位
+               - cflt_keys  : [list] 資料表主鍵清單，作為觸發衝突之判定基準
+               - w_mode     : [dict] 欄位寫入策略配置；預設為 overwrite (覆寫模式)
         [輸出] str: 封裝完成之 DO UPDATE SET 衝突處理語句
         """
         upd_frags = []   # 數據更新 SQL 語法片段 (Update)
@@ -51,13 +51,13 @@ class DBManager:
             mode = w_mode.get(col, "overwrite")
             if mode == "coalesce":
                 # 保留模式: 優先保留現值，僅在現有值為 NULL 時更新
-                upd_frags.append(f'"{col}" = COALESCE({tabl_path}."{col}", EXCLUDED."{col}")')
+                upd_frags.append(f'"{col}" = COALESCE({table_path}."{col}", EXCLUDED."{col}")')
             else:
                 # 覆蓋模式: 強制以新數據覆蓋現有值
                 upd_frags.append(f'"{col}" = EXCLUDED."{col}"')
             
             # 每個欄位增加變異偵測條件
-            cnd_frags.append(f'{tabl_path}."{col}" IS DISTINCT FROM EXCLUDED."{col}"')
+            cnd_frags.append(f'{table_path}."{col}" IS DISTINCT FROM EXCLUDED."{col}"')
 
         # [STEP-2] 整合完整 DO UPDATE SET 子句, 並附加「系統更新時間戳」與「變異過濾器」
         if upd_frags:
@@ -71,21 +71,21 @@ class DBManager:
         return cflt_act
 
     # =============================================
-    def batch_upsert(self, upsert_df, tabl_info):
+    def batch_upsert(self, upsert_df, table_info):
         """
         [名稱] Func.C 數據批次寫入函式
         [功能] 動態解析資料表配置，執行 PostgreSQL 數據高速批次寫入。
         [參數] 共計 2 組參數，以下說明:
-               - upsert_df : [pd.DataFrame] 待寫入之標準化數據集
-               - tabl_info : [dict] 目標資料表配置資訊字典
+               - upsert_df  : [pd.DataFrame] 待寫入之標準化數據集
+               - table_info : [dict] 目標資料表配置資訊字典
         [輸出] int: 成功寫入之有效數據筆數；若數據集為空則回傳 0
         """
         try:
             """ [STAGE-1] 資料表資訊解析階段 """
-            schema     = tabl_info["schm"]
-            table_name = tabl_info["tabl"]
-            ukey       = tabl_info["ukey"]
-            mode       = tabl_info.get("mode")
+            schema     = table_info["schm"]
+            table_name = table_info["tabl"]
+            ukey       = table_info["ukey"]
+            mode       = table_info.get("mode")
             
             # 驗證更新模式組態格式，攔截配置遺失或格式異常者
             if not isinstance(mode, dict):
@@ -110,7 +110,7 @@ class DBManager:
                 return 0
 
             """ [STAGE-2] 建構批次寫入語法階段 """
-            tabl_path     = f'"{schema}"."{table_name}"'
+            table_path    = f'"{schema}"."{table_name}"'
             cols_list     = upsert_df.columns.tolist()
             cols_str      = ", ".join([f'"{col}"' for col in cols_list])
             placeholders  = ", ".join([f"%({col})s" for col in cols_list])
@@ -118,13 +118,13 @@ class DBManager:
 
             # 整合完整 SQL 批次寫入語法 (INSERT ... ON CONFLICT DO UPDATE)
             cflt_acnts = self._build_conflict_fragments(
-                upsert_df = upsert_df,
-                tabl_path = tabl_path,
-                cflt_keys = ukey,
-                w_mode    = mode
+                upsert_df  = upsert_df,
+                table_path = table_path,
+                cflt_keys  = ukey,
+                w_mode     = mode
             )
             upsert_sql = f"""
-                INSERT INTO {tabl_path} ({cols_str}) VALUES ({placeholders})
+                INSERT INTO {table_path} ({cols_str}) VALUES ({placeholders})
                 ON CONFLICT ({cflt_keys_str})
                 {cflt_acnts};
             """
@@ -151,7 +151,7 @@ class DBManager:
         except Exception:
             # 捕捉系統原始異常，進行堆疊追蹤並推送結構化例外日誌
             sys_err = traceback.format_exc()
-            safe_tb_name = tabl_info.get("tabl", "UNK") if isinstance(tabl_info, dict) else "UNK"
+            safe_tb_name = table_info.get("tabl", "UNK") if isinstance(table_info, dict) else "UNK"
             log.CONTENT(
                 type = "DB",
                 targ = "MARS_DB",

@@ -5,7 +5,7 @@
 # ##########################################################################################
 
 # 掛載外部依賴
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent   # 動態取得專案根目錄
@@ -42,11 +42,11 @@ class PathConfig:
     [名稱] 實體路徑組態管理引擎 (Path Configuration Management Engine)
     [作用] 集中管理專案根路徑、模型權重、日誌目錄與訓練/辨識資料夾映射，利用 pathlib 確保跨平台相容性。
     """
-    root    : Path = PROJECT_ROOT                            # 專案實體絕對根目錄
-    weights : Path = PROJECT_ROOT / "weights"                # [權重區] 各領域專屬模型權重 (跨階段共用)
-    logs    : Path = PROJECT_ROOT / "logs"                   # [日誌區] 系統日誌紀錄根目錄 (跨階段共用)
-    train   : TrainPathConfig = TrainPathConfig()            # 訓練階段資料路徑集合
-    infer   : InferPathConfig = InferPathConfig()            # 辨識階段資料路徑集合
+    root    : Path = PROJECT_ROOT                                        # 專案實體絕對根目錄
+    weights : Path = PROJECT_ROOT / "weights"                            # [權重區] 各領域專屬模型權重 (跨階段共用)
+    logs    : Path = PROJECT_ROOT / "logs"                               # [日誌區] 系統日誌紀錄根目錄 (跨階段共用)
+    train   : TrainPathConfig = field(default_factory=TrainPathConfig)   # 訓練階段資料路徑集合
+    infer   : InferPathConfig = field(default_factory=InferPathConfig)   # 辨識階段資料路徑集合
 
 # =============================================
 # ⭐｜模組導出｜實例化管理對象

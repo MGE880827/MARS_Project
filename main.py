@@ -12,7 +12,7 @@ import traceback
 # [LOAD] 掛載內部依賴
 from utils import log
 from utils.env import cache_remover, input_resolver
-from src.database import WIPE_TBLS, INIT_TBLS, AUDT_TBLS
+from src.database import db_init
 from train_pipe import TrainPipeline
 from infer_pipe import InferPipeline
 
@@ -35,15 +35,15 @@ def initialize_system(wipe_db=False):
 
         # [EXEC] 全域資料表移除階段
         if wipe_db:
-            WIPE_TBLS()
+            db_init.WIPE_TBLS()
             log.SPLIT()
 
         # [EXEC] 全域資料表建置階段
-        INIT_TBLS() 
+        db_init.INIT_TBLS() 
         log.SPLIT()
 
         # [EXEC] 全域資料表審計階段
-        AUDT_TBLS()
+        db_init.AUDT_TBLS()
         log.SPLIT()
 
         log.IND_OFF()

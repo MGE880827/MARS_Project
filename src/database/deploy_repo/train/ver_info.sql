@@ -1,6 +1,6 @@
 -- ##########################################################################################
 -- 專案名稱: 多重目標自動辨識系統 - 資料表實體部署指令 (Table Entity Deployment Script)
--- 維護日期: 2026-09-16
+-- 維護日期: 2026-09-21
 -- 檔案路徑: MARS_Project/src/database/deploy_repo/train/ver_info.sql
 -- ##########################################################################################
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS {{TARGET_PATH}} (
     -- [NOTE] 訓練參數類別 --
     img_size        SMALLINT,       -- 輸入影像之解析度 (e.g., 640, 480)
     batch_size      SMALLINT,       -- 訓練批次大小
-    accumulate      SMALLINT,       -- 梯度累積步數
+    nbs             SMALLINT,       -- 名目批次大小
     epoch_qty       SMALLINT,       -- 總訓練輪次數
     learn_rate      NUMERIC(7,6),   -- 最佳化初始學習率
 

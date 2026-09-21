@@ -1,6 +1,6 @@
 # ##########################################################################################
 # 專案名稱: 多重目標自動辨識系統 - 光學字元辨識工具 (Optical Character Recognition Tool)
-# 維護日期: 2026-09-18
+# 維護日期: 2026-09-22
 # 檔案路徑: MARS_Project/src/vis_recg/img_proc/char_ocrs.py
 # ##########################################################################################
 
@@ -47,8 +47,8 @@ class CharReader:
         """
         try:
             from paddleocr import PaddleOCR
-            # 關閉「方向分類器」及「底層日誌」以提升辨識速度，並使用「繁中」與「英數」模型來進行字元辨識
-            self.ocr_inst = PaddleOCR(use_angle_cls=False, lang="chinese_cht", show_log=False)
+            # 關閉「方向分類器」以提升辨識速度，並使用「繁中」與「英數」模型來進行字元辨識
+            self.ocr_inst = PaddleOCR(use_angle_cls=False, lang="chinese_cht")
             self.backend_type = "PADDLE"
         except ImportError:
             try:

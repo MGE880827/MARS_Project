@@ -1,6 +1,6 @@
 # ##########################################################################################
 # 專案名稱: 多重目標自動辨識系統 - 影片並行抽幀工具 (Concurrent Video Extraction Tool)
-# 維護日期: 2026-09-17
+# 維護日期: 2026-09-21
 # 檔案路徑: MARS_Project/src/data_prep/conc_vid_extr.py
 # ##########################################################################################
 
@@ -90,7 +90,7 @@ class ConcurrentVideoExtractor:
         # 依照「拍攝視角」差異進行參數指派
         for sgl_vid_path in sorted(src_vids_dir.iterdir()):
             sgl_vid_name = sgl_vid_path.name
-            if sgl_vid_path.is_file() and sgl_vid_name.suffix.lower() in [".mp4", ".avi", ".mkv"]:
+            if sgl_vid_path.is_file() and sgl_vid_path.suffix.lower() in [".mp4", ".avi", ".mkv"]:
                 sgl_vid_stem = sgl_vid_path.stem
 
                 # [STEP-1] 執行檔名特徵拆解與中介資料提取

@@ -176,7 +176,7 @@ class VehiclePipeline:
                 })
 
             # [STEP-3] 批次寫入資料庫與狀態審計
-            veh_recg_stat = write_repo.infer.insert_veh_recg(veh_recg_records)
+            veh_recg_stat = write_repo.infer.upsert_veh_recg_logs(veh_recg_records)
             if veh_recg_stat:
                 log.CONTENT(
                     type = "DATABASE",
@@ -337,6 +337,10 @@ class VehiclePipeline:
                 main_conf_s = main_obj.get("conf_s")
                 main_bbox   = main_obj.get("bbox")
                 if main_cls_id is None or main_bbox is None or len(main_bbox) != 4:
+                    continue
+                w = float(main_bbox[2]) - float(main_bbox[0])
+                h = float(main_bbox[3]) - float(main_bbox[1])
+                if w < 0 or h < 0:
                     continue
                 
                 # [STEP-2] 執行主物件切裁，並提取全域座標偏移量

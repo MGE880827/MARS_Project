@@ -1,6 +1,6 @@
 # ##########################################################################################
 # 專案名稱: 多重目標自動辨識系統 - 模型版本資訊同步寫入工具 (Model Version Info Sync Write Tool)
-# 維護日期: 2026-09-16
+# 維護日期: 2026-09-21
 # 檔案路徑: MARS_Project/src/database/write_repo/train/ver_info.py
 # ##########################################################################################
 
@@ -23,10 +23,10 @@ def upsert_version_info(record):
         return False
 
     # 所屬資料表名稱
-    tbls_info = TABLES["train"]["ver_info"]
+    table_info = TABLES["train"]["ver_info"]
     
     # 高效批次寫入並回傳 DB 寫入結果
     upsert_df = pd.DataFrame([record])
-    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=tbls_info)
+    upst_cnts = db_mngr.SQL_UPSERT(upsert_df=upsert_df, table_info=table_info)
 
     return bool(upst_cnts > 0)
