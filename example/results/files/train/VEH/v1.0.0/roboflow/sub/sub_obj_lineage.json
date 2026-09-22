@@ -1,0 +1,132 @@
+[
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.6a025d0e1cc4d1b19d414cb7c6720309_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.6a025d0e1cc4d1b19d414cb7c6720309.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC",
+      "BRAND"
+    ],
+    "crop_rect": [
+      1,
+      184,
+      183,
+      361
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.86f73acdee373ebc7628e68e4e5657b6_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.86f73acdee373ebc7628e68e4e5657b6.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC",
+      "BRAND"
+    ],
+    "crop_rect": [
+      5,
+      242,
+      169,
+      400
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.acdf8b6873ab089bade25ed3c34857dd_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00017_jpg.rf.acdf8b6873ab089bade25ed3c34857dd.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC",
+      "BRAND"
+    ],
+    "crop_rect": [
+      8,
+      237,
+      166,
+      389
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.73a39a5496d84a67812a8c68c7951642_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.73a39a5496d84a67812a8c68c7951642.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC"
+    ],
+    "crop_rect": [
+      94,
+      219,
+      353,
+      442
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.ad3191b2d591c2815f8885a0fd0c18a2_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.ad3191b2d591c2815f8885a0fd0c18a2.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC"
+    ],
+    "crop_rect": [
+      290,
+      220,
+      544,
+      437
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.f440446512fa9f41b65066cd4fddaf70_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00046_jpg.rf.f440446512fa9f41b65066cd4fddaf70.jpg",
+    "split": "train",
+    "sub_domain": [
+      "LIC"
+    ],
+    "crop_rect": [
+      98,
+      220,
+      348,
+      434
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  },
+  {
+    "crop_filename": "TRAIN_S25U_VEH_ROOF_20260921_180355_00001_jpg.rf.f9f81f4de5ce490eb4da796159dc64dc_crop000.jpg",
+    "parent_image": "TRAIN_S25U_VEH_ROOF_20260921_180355_00001_jpg.rf.f9f81f4de5ce490eb4da796159dc64dc.jpg",
+    "split": "valid",
+    "sub_domain": [
+      "LIC",
+      "BRAND"
+    ],
+    "crop_rect": [
+      78,
+      200,
+      226,
+      340
+    ],
+    "orig_wh": [
+      640,
+      640
+    ]
+  }
+]

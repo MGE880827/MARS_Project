@@ -1,0 +1,4 @@
+"main_domain","main_ver_id","sub_domain","sub_ver_id","stage_level","bbox_type","train_date","algo_name","bone_name","wght_path","class_qty","img_size","batch_size","nbs","epoch_qty","learn_rate","create_ts","update_ts"
+"VEH","v1.0.0","BRAND","v1.0.0",2,"HBB","2026-09-22","MARS-YOLO11","yolo11n.pt","MARS_Project/weights/VEH/sub/BRAND/v1.0.0/best.pt",13,480,4,16,5,"0.010000","2026-09-22 03:00:46.818541","2026-09-22 03:00:46.818541"
+"VEH","v1.0.0","LIC","v1.0.0",2,"OBB","2026-09-22","MARS-YOLO11","yolo11n-obb.pt","MARS_Project/weights/VEH/sub/LIC/v1.0.0/best.pt",1,480,4,16,5,"0.010000","2026-09-22 03:00:38.349671","2026-09-22 03:00:38.349671"
+"VEH","v1.0.0","NONE","NONE",1,"HBB","2026-09-22","MARS-YOLO11","yolo11n.pt","MARS_Project/weights/VEH/main/v1.0.0/best.pt",5,640,4,16,5,"0.010000","2026-09-22 03:00:20.24605","2026-09-22 03:00:20.24605"

@@ -1,0 +1,19 @@
+path: C:\Users\magiceason\Desktop\MARS_Project\data\01_train\roboflow\VEH\sub\BRAND
+train: train/images
+val: valid/images
+test: test/images
+nc: 13
+names:
+- toyota
+- honda
+- nissan
+- mitsubishi
+- ford
+- hyundai
+- mazda
+- volkswagen
+- lexus
+- benz
+- bmw
+- tesla
+- luxgen

@@ -1,0 +1,5 @@
+python main.py --mode init --wipe
+python main.py --mode init
+python main.py --mode train --stage prepare
+python main.py --mode train --stage train --ver_id VEH:v1.0.0 --epochs VEH:5
+python main.py --mode infer --stage infer

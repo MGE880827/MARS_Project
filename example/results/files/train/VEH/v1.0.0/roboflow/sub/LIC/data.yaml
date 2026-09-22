@@ -1,0 +1,7 @@
+path: C:\Users\magiceason\Desktop\MARS_Project\data\01_train\roboflow\VEH\sub\LIC
+train: train/images
+val: valid/images
+test: test/images
+nc: 1
+names:
+- license_plate
