@@ -1,0 +1,23 @@
+# 排除 git 清單
+.vscode/
+.idea/
+.env
+venv/
+DATA_REVISE/
+data/01_train/raw_vids/*
+data/01_train/frames/*
+data/01_train/roboflow/*
+data/01_train/archive/*
+data/02_infer/vids_todo/*
+data/02_infer/vids_done/*
+weights/*
+demo/
+
+# 保留 git 清單
+!data/01_train/raw_vids/.gitkeep
+!data/01_train/frames/.gitkeep
+!data/01_train/roboflow/.gitkeep
+!data/01_train/archive/.gitkeep
+!data/02_infer/vids_todo/.gitkeep
+!data/02_infer/vids_done/.gitkeep
+!weights/.gitkeep
